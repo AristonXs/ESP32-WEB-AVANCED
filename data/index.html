@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Page SKYBot</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" href="data:,">
+    <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body>
+    <h1>Projet SKYbot</h1>
+    <p>Vitesse = <strong id="brightness-value">0</strong></p>
+
+    <div class="arrow-grid">
+        <a href="#" class="left" onclick="sendRequest('/LEFT'); return false;"><img src="caret-left.svg" alt="Left"></a>
+        <a href="#" class="up" onclick="sendRequest('/UP'); return false;"><img src="sort-up.svg" alt="Up"></a>
+        <a href="#" class="down" onclick="sendRequest('/DOWN'); return false;"><img src="sort-down.svg" alt="Down"></a>
+        <a href="#" class="right" onclick="sendRequest('/RIGHT'); return false;"><img src="caret-right.svg" alt="Right"></a>
+    </div>
+
+    <script>
+        let isKeyDown = {};
+        let brightnessInterval;
+        let currentBrightness = 0; 
+
+        function sendRequest(action) {
+            fetch(action)
+                .then(response => {
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    return response.text();
+                })
+                .then(data => {
+                    if (action.includes('BRIGHT')) {
+                        currentBrightness = parseInt(data, 10); 
+                        document.getElementById('brightness-value').textContent = currentBrightness;
+                    }
+                })
+                .catch(error => console.error('There was a problem with the fetch operation:', error));
+        }
+
+        document.addEventListener('keydown', function(event) {
+            if (!isKeyDown[event.key]) {
+                isKeyDown[event.key] = true;
+
+                if (event.key === 'ArrowUp') {
+                    document.querySelector('.up img').src = 'square-up.svg';
+                    sendRequest('/UP');
+                    brightnessInterval = setInterval(() => {
+                        if (currentBrightness < 255) {
+                            sendRequest('/BRIGHT_UP');
+                        } else {
+                            clearInterval(brightnessInterval);
+                        }
+                    }, 300);
+                } else if (event.key === 'ArrowDown') {
+                    document.querySelector('.down img').src = 'square-down.svg';
+                    sendRequest('/DOWN');
+                    brightnessInterval = setInterval(() => {
+                        if (currentBrightness > 0) {
+                            sendRequest('/BRIGHT_DOWN');
+                        } else {
+                            clearInterval(brightnessInterval);
+                        }
+                    }, 300);
+                } else if (event.key === 'ArrowLeft') {
+                    document.querySelector('.left img').src = 'square-left.svg'; 
+                    sendRequest('/LEFT');
+                } else if (event.key === 'ArrowRight') {
+                    document.querySelector('.right img').src = 'square-right.svg'; 
+                    sendRequest('/RIGHT');
+                }
+            }
+        });
+
+        document.addEventListener('keyup', function(event) {
+            if (isKeyDown[event.key]) {
+                isKeyDown[event.key] = false;
+                clearInterval(brightnessInterval);
+                if (event.key === 'ArrowUp') {
+                    document.querySelector('.up img').src = 'sort-up.svg';
+                    sendRequest('/UP_OFF');
+                } else if (event.key === 'ArrowDown') {
+                    document.querySelector('.down img').src = 'sort-down.svg';
+                    sendRequest('/DOWN_OFF');
+                } else if (event.key === 'ArrowLeft') {
+                    document.querySelector('.left img').src = 'caret-left.svg'; 
+                    sendRequest('/LEFT_OFF');
+                } else if (event.key === 'ArrowRight') {
+                    document.querySelector('.right img').src = 'caret-right.svg';
+                    sendRequest('/RIGHT_OFF');
+                }
+            }
+        });
+    </script>
+</body>
+</html>
