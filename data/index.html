@@ -1,26 +1,99 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Page SKYBot</title>
+    <title>SKYBot Control Panel</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="icon" href="data:,">
     <link rel="stylesheet" type="text/css" href="style.css">
+    <style>
+        /* Center all headers */
+        header h1, footer p {
+            text-align: center;
+        }
+
+        /* Style for the header */
+        header h1 {
+            font-size: 2.5em;
+            color: #007BFF;
+            margin: 20px 0;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Layout for camera and status */
+        .camera-status-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+        }
+
+        .status-info {
+            margin: 0 20px;
+            text-align: center;
+            background-color: #f0f0f0;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .status-info p {
+            margin: 0;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        .status-info strong {
+            color: #007BFF;
+        }
+
+        /* Center the video element */
+        .camera-output video {
+            display: block;
+            margin: 0 auto;
+            border: 2px solid #007BFF;
+            border-radius: 8px;
+        }
+    </style>
 </head>
 <body>
-    <h1>Projet SKYbot</h1>
-    <p>Vitesse = <strong id="brightness-value">0</strong></p>
+    <header>
+        <h1>Skybot Control Panel</h1>
+    </header>
 
-    <div class="arrow-grid">
-        <a href="#" class="left" onclick="sendRequest('/LEFT'); return false;"><img src="caret-left.svg" alt="Left"></a>
-        <a href="#" class="up" onclick="sendRequest('/UP'); return false;"><img src="sort-up.svg" alt="Up"></a>
-        <a href="#" class="down" onclick="sendRequest('/DOWN'); return false;"><img src="sort-down.svg" alt="Down"></a>
-        <a href="#" class="right" onclick="sendRequest('/RIGHT'); return false;"><img src="caret-right.svg" alt="Right"></a>
-    </div>
+    <main>
+        <section class="camera-status-container">
+            <div class="status-info">
+                <p>Temperature: <strong id="temperature-value">25</strong> °C</p>
+            </div>
+
+            <div class="camera-output">
+                <video id="camera" autoplay playsinline></video>
+            </div>
+
+            <div class="status-info">
+                <p>Speed: <strong id="speed-value">0</strong> km/h</p>
+            </div>
+        </section>
+
+        <section class="controls">
+            <div class="arrow-grid">
+                <a href="#" class="left" onclick="sendRequest('/LEFT'); return false;"><img src="caret-left.svg" alt="Left"></a>
+                <a href="#" class="up" onclick="sendRequest('/UP'); return false;"><img src="sort-up.svg" alt="Up"></a>
+                <a href="#" class="down" onclick="sendRequest('/DOWN'); return false;"><img src="sort-down.svg" alt="Down"></a>
+                <a href="#" class="right" onclick="sendRequest('/RIGHT'); return false;"><img src="caret-right.svg" alt="Right"></a>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 SKYBot Control System</p>
+    </footer>
 
     <script>
         let isKeyDown = {};
-        let brightnessInterval;
-        let currentBrightness = 0; 
+        let speedInterval;
+        let currentSpeed = 0;
+        let currentTemperature = 25;
 
         function sendRequest(action) {
             fetch(action)
@@ -29,12 +102,12 @@
                     return response.text();
                 })
                 .then(data => {
-                    if (action.includes('BRIGHT')) {
-                        currentBrightness = parseInt(data, 10); 
-                        document.getElementById('brightness-value').textContent = currentBrightness;
+                    if (action.includes('SPEED')) {
+                        currentSpeed = parseInt(data, 10);
+                        document.getElementById('speed-value').textContent = currentSpeed;
                     }
                 })
-                .catch(error => console.error('There was a problem with the fetch operation:', error));
+                .catch(error => console.error('Fetch error:', error));
         }
 
         document.addEventListener('keydown', function(event) {
@@ -44,21 +117,21 @@
                 if (event.key === 'ArrowUp') {
                     document.querySelector('.up img').src = 'square-up.svg';
                     sendRequest('/UP');
-                    brightnessInterval = setInterval(() => {
-                        if (currentBrightness < 255) {
-                            sendRequest('/BRIGHT_UP');
+                    speedInterval = setInterval(() => {
+                        if (currentSpeed < 100) {
+                            sendRequest('/SPEED_UP');
                         } else {
-                            clearInterval(brightnessInterval);
+                            clearInterval(speedInterval);
                         }
                     }, 300);
                 } else if (event.key === 'ArrowDown') {
                     document.querySelector('.down img').src = 'square-down.svg';
                     sendRequest('/DOWN');
-                    brightnessInterval = setInterval(() => {
-                        if (currentBrightness > 0) {
-                            sendRequest('/BRIGHT_DOWN');
+                    speedInterval = setInterval(() => {
+                        if (currentSpeed > 0) {
+                            sendRequest('/SPEED_DOWN');
                         } else {
-                            clearInterval(brightnessInterval);
+                            clearInterval(speedInterval);
                         }
                     }, 300);
                 } else if (event.key === 'ArrowLeft') {
@@ -74,7 +147,7 @@
         document.addEventListener('keyup', function(event) {
             if (isKeyDown[event.key]) {
                 isKeyDown[event.key] = false;
-                clearInterval(brightnessInterval);
+                clearInterval(speedInterval);
                 if (event.key === 'ArrowUp') {
                     document.querySelector('.up img').src = 'sort-up.svg';
                     sendRequest('/UP_OFF');
@@ -90,6 +163,19 @@
                 }
             }
         });
+
+        function startCamera() {
+            const videoElement = document.getElementById('camera');
+            navigator.mediaDevices.getUserMedia({ video: true })
+                .then((stream) => {
+                    videoElement.srcObject = stream;
+                })
+                .catch((error) => {
+                    console.error('Error accessing the webcam:', error);
+                });
+        }
+
+        window.onload = startCamera;
     </script>
 </body>
 </html>
