@@ -1,95 +1,230 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>SKYBot Control Panel</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="icon" href="data:,">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Futuristic SKYBot Control Panel</title>
     <link rel="stylesheet" type="text/css" href="style.css">
     <style>
-        /* Center all headers */
-        header h1, footer p {
-            text-align: center;
+        body {
+            margin: 0;
+            background-color: #000;
+            height: 100vh;
+            color: #00ffff;
+            font-family: Arial, sans-serif;
+            overflow: hidden;
         }
-
-        /* Style for the header */
-        header h1 {
-            font-size: 2.5em;
-            color: #007BFF;
-            margin: 20px 0;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+    
+        .ui-frame {
+            width: 100%;
+            height: 100%;
+            border: 2px solid #00ffff;
+            position: relative;
+            box-sizing: border-box;
         }
-
-        /* Layout for camera and status */
-        .camera-status-container {
+    
+        .panel {
+            position: absolute;
+            border: 2px solid #00ffff;
+            box-sizing: border-box;
+        }
+    
+        .top-panel {
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 10%;
             display: flex;
             justify-content: center;
             align-items: center;
-            width: 100%;
         }
-
+    
+        .left-panel {
+            top: 73%;
+            left: 0;
+            width: 15%;
+            height: 7%;
+        }
+    
+        .right-panel {
+            top: 73%;
+            right: 0;
+            width: 15%;
+            height: 7%;
+        }
+    
+        .main-screen {
+            position: absolute;
+            top: 10%;
+            left: 15%;
+            width: 70%;
+            height: 70%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+    
+        .camera-output {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 2px solid #00ffff; /* Added border */
+        }
+    
+        .camera-output video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+    
+        .bottom-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 20%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-top: 2px solid #00ffff;
+        }
+    
+        .arrow-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 40px);
+            grid-template-rows: repeat(3, 40px);
+            gap: 5px;
+            justify-content: center;
+            align-content: center;
+        }
+    
+        .arrow-grid a {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 2px solid #00ffff;
+            border-radius: 8px;
+            width: 40px;
+            height: 40px;
+        }
+    
+        .arrow-grid img {
+            width: 20px;
+            height: 20px;
+        }
+    
         .status-info {
-            margin: 0 20px;
-            text-align: center;
-            background-color: #f0f0f0;
+            background-color: #111;
             padding: 10px;
             border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
         }
-
+    
         .status-info p {
             margin: 0;
             font-size: 1.2em;
             font-weight: bold;
         }
-
+    
         .status-info strong {
-            color: #007BFF;
+            color: #00ffff;
         }
+    
+        .decorative-panel {
+            position: absolute;
+            width: 300px;
+            height: 50px;
+            background: transparent;
+            border-radius: 5px;
+            padding-left: 15px;
+        }
+        .decorative-panel::before {
+            content: "";
+            position: absolute;
+            top: 5px;
+            left: -8px;
+            width: 12px;
+            height: 12px;
+            background: cyan;
+            border-radius: 50%;
+            box-shadow: 0 0 10px cyan;
+        }
+        .top-border {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 500px; 
+    display: flex;
+    justify-content: center;
+}
 
-        /* Center the video element */
-        .camera-output video {
-            display: block;
-            margin: 0 auto;
-            border: 2px solid #007BFF;
-            border-radius: 8px;
+.top-border svg {
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+        .svg-line {
+            position: absolute;
+            top: 0;
+            left: -15px;
         }
     </style>
 </head>
 <body>
-    <header>
-        <h1>Skybot Control Panel</h1>
-    </header>
-
-    <main>
-        <section class="camera-status-container">
+    <div class="ui-frame">
+        <div class="panel top-panel">
+            <h1>Skybot Control Panel</h1>
+        </div>
+        <div class="panel left-panel">
             <div class="status-info">
                 <p>Temperature: <strong id="temperature-value">25</strong> °C</p>
             </div>
-
+        </div>
+        <div class="top-border">
+            <svg class="svg-line" width="200%" height="500">
+                <polyline points="1,45 615,45  635,65 1030,65 1050,45 2000,45" 
+                          stroke="cyan" stroke-width="3" fill="none"/>
+            </svg>
+        </div>
+        
+        <div class="main-screen">
             <div class="camera-output">
                 <video id="camera" autoplay playsinline></video>
             </div>
-
+        </div>
+        
+        <div class="panel right-panel">
             <div class="status-info">
                 <p>Speed: <strong id="speed-value">0</strong> km/h</p>
             </div>
-        </section>
-
-        <section class="controls">
+        </div>
+        <div class="decorative-panel" style="bottom: 20%; left: 1%;">
+            <svg class="svg-line" width="210" height="50">
+                <polyline points="10,10 30,10 40,25 210,25" stroke="cyan" stroke-width="3" fill="none"/>
+            </svg>
+        </div>
+        <div class="decorative-panel" style="bottom: 20%; right: -5%;">
+            <svg class="svg-line" width="210" height="50">
+                <polyline points="10,10 30,10 40,25 210,25" stroke="cyan" stroke-width="3" fill="none"/>
+            </svg>
+        </div>
+        <div class="panel bottom-bar">
             <div class="arrow-grid">
                 <a href="#" class="left" onclick="sendRequest('/LEFT'); return false;"><img src="caret-left.svg" alt="Left"></a>
                 <a href="#" class="up" onclick="sendRequest('/UP'); return false;"><img src="sort-up.svg" alt="Up"></a>
                 <a href="#" class="down" onclick="sendRequest('/DOWN'); return false;"><img src="sort-down.svg" alt="Down"></a>
                 <a href="#" class="right" onclick="sendRequest('/RIGHT'); return false;"><img src="caret-right.svg" alt="Right"></a>
             </div>
-        </section>
-    </main>
-
-    <footer>
-        <p>&copy; 2024 SKYBot Control System</p>
-    </footer>
+        </div>
+    </div>
 
     <script>
+        
         let isKeyDown = {};
         let speedInterval;
         let currentSpeed = 0;
