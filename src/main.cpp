@@ -18,6 +18,10 @@ AsyncWebServer server(80);
 int brightness = 0;
 int brightnessStep = 5; // Step for brightness change
 
+// Variables for speed and temperature
+int currentSpeed = 0;
+int currentTemperature = 25;
+
 void setup() {
     Serial.begin(115200);
 
@@ -74,7 +78,7 @@ void setup() {
     server.on("/square-right.svg", HTTP_GET, [](AsyncWebServerRequest *request) {
         request->send(SPIFFS, "/square-right.svg", "image/svg+xml");
     });
-        server.on("/square-left.svg", HTTP_GET, [](AsyncWebServerRequest *request) {
+    server.on("/square-left.svg", HTTP_GET, [](AsyncWebServerRequest *request) {
         request->send(SPIFFS, "/square-left.svg", "image/svg+xml");
     });
     server.on("/sort-down.svg", HTTP_GET, [](AsyncWebServerRequest *request) {
@@ -162,9 +166,36 @@ void setup() {
         request->send(200, "text/plain", "LED RIGHT OFF");
     });
 
+    // Endpoint to get current speed and temperature
+    server.on("/status", HTTP_GET, [](AsyncWebServerRequest *request) {
+        String jsonResponse = "{\"speed\":" + String(currentSpeed) + ",\"temperature\":" + String(currentTemperature) + "}";
+        request->send(200, "application/json", jsonResponse);
+    });
+
+    // Endpoint to set speed
+    server.on("/setSpeed", HTTP_GET, [](AsyncWebServerRequest *request) {
+        if (request->hasParam("value")) {
+            currentSpeed = request->getParam("value")->value().toInt();
+            Serial.println("Speed set to: " + String(currentSpeed));
+            request->send(200, "text/plain", "Speed set");
+        } else {
+            request->send(400, "text/plain", "Missing speed value");
+        }
+    });
+
+    // Endpoint to set temperature
+    server.on("/setTemperature", HTTP_GET, [](AsyncWebServerRequest *request) {
+        if (request->hasParam("value")) {
+            currentTemperature = request->getParam("value")->value().toInt();
+            Serial.println("Temperature set to: " + String(currentTemperature));
+            request->send(200, "text/plain", "Temperature set");
+        } else {
+            request->send(400, "text/plain", "Missing temperature value");
+        }
+    });
+
     server.begin();
 }
 
 void loop() {
-    // Main loop does nothing, web server handles requests
 }
