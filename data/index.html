@@ -95,14 +95,17 @@
             align-items: center;
             flex-direction: column;
         }
-    
+    #camera {
+        width: 100%;
+        height: 100%;
+    }
         .camera-output {
             width: 100%;
             height: 100%;
             display: flex;
             justify-content: center;
             align-items: center;
-            border: 2px solid #00ffff; /* Added border */
+            border: 2px solid #00ffff;
         }
     
         .camera-output video {
@@ -155,7 +158,7 @@
     justify-content: center;
     align-content: center;
     transform: translateY(-25px);
-    z-index: 1; /* Ensure the grid is above the background effect */
+    z-index: 1; 
 }
 .arrow-grid a {
     display: flex;
@@ -209,34 +212,34 @@
         }
     }
 
-    .neon-dot {
-        stroke: cyan;
-        stroke-width: 7;
-        stroke-dasharray: 7, 199; 
-        stroke-dashoffset: 2000;
-        animation: neonDotRun 1s linear infinite;
-        filter: drop-shadow(10 10 10px cyan);
+.neon-dot {
+     stroke: cyan;
+    stroke-width: 7;
+    stroke-dasharray: 7, 199; 
+    stroke-dashoffset: 2000;
+    animation: neonDotRun 1s linear infinite;
+     filter: drop-shadow(10 10 10px cyan);
     }
-        .decorative-panel {
-            position: absolute;
-            width: 300px;
-            height: 50px;
-            background: transparent;
-            border-radius: 5px;
-            padding-left: 15px;
+.decorative-panel {
+    position: absolute;
+     width: 300px;
+     height: 50px;
+    background: transparent;
+    border-radius: 5px;
+    padding-left: 15px;
         }
-        .decorative-panel::before {
-            content: "";
-            position: absolute;
-            top: 5px;
-            left: -8px;
-            width: 12px;
-            height: 12px;
-            background: cyan;
-            border-radius: 50%;
-            box-shadow: 0 0 10px cyan;
+ .decorative-panel::before {
+    content: "";
+    position: absolute;
+    top: 5px;
+    left: -8px;
+    width: 12px;
+    height: 12px;
+    background: cyan;
+    border-radius: 50%;
+    box-shadow: 0 0 10px cyan;
         }
-        .top-border {
+.top-border {
     position: absolute;
     top: 0;
     left: 0;
@@ -252,11 +255,19 @@
     left: 0;
 }
 
-        .svg-line {
-            position: absolute;
-            top: 0;
-            left: -15px;
-        }
+.svg-line {
+ position: absolute;
+ top: 0;
+ left: -15px;
+ }
+
+ .new-panel {
+    position: absolute;
+    top: 36%; 
+    left: -2px;
+    width: 15%;
+    height: 7%;
+}
     </style>
 </head>
 <body>
@@ -264,9 +275,13 @@
         <div class="panel top-panel">
             <h1 class="glitch">Skybot Control Panel</h1>
         </div>
-        <div class="panel left-panel">
+        <div class="panel new-panel">
+            <iframe src="http://localhost:1881/ui/#/1" width="257" height="350"></iframe>
+        </div>
+        
+        <div class="panel left-panel" >
             <div class="status-info">
-                <p>Temperature: <strong id="temperature-value">25</strong> °C</p>
+                <p>Temperature: <strong id="temp-value">?°C</strong></p>
             </div>
         </div>
         <div class="top-border">
@@ -275,18 +290,21 @@
                           stroke="cyan" stroke-width="3" fill="none"/>
             </svg>
         </div>
-        
         <div class="main-screen">
             <div class="camera-output">
-                <video id="camera" autoplay playsinline></video>
+                <img id="camera" src="http://192.168.1.37:81/stream" alt="Camera Stream">
+            </div>
+        </div>
+        <div class="panel new-panel" style="left: auto; right: 0px; z-index: -1;">
+            <iframe src="http://localhost:1880/ui/#/1" width="257" height="350"></iframe>
+        </div>
+
+        <div class="panel right-panel">
+            <div class="status-info">
+                <p>Speed: <strong id="speed-value">? km/h</strong></p>
             </div>
         </div>
         
-        <div class="panel right-panel">
-            <div class="status-info">
-                <p>Speed: <strong id="speed-value">0</strong> km/h</p>
-            </div>
-        </div>
         <div class="decorative-panel" style="bottom: 20%; left: 1%;">
             <svg class="svg-line" width="210" height="50">
                 <polyline points="10,10 30,10 40,25 210,25" stroke="cyan" stroke-width="3" fill="none"/>
@@ -302,7 +320,6 @@
         </div>
         <div class="decorative-panel" style="bottom: 20%; right: -5%;">
             <svg class="svg-line" width="210" height="50">
-                <!-- Линия -->
                 <polyline points="10,10 30,10 40,25 210,25" stroke="cyan" stroke-width="3" fill="none"/>
                 
                 <circle class="neon-dot" r="5" fill="cyan">
@@ -318,81 +335,95 @@
         </div>
         <div class="panel bottom-bar">
             <div class="arrow-grid">
-                <a href="#" class="left" onclick="sendRequest('/LEFT'); return false;"><img src="caret-left.svg" alt="Left"></a>
-                <a href="#" class="up" onclick="sendRequest('/UP'); return false;"><img src="sort-up.svg" alt="Up"></a>
-                <a href="#" class="down" onclick="sendRequest('/DOWN'); return false;"><img src="sort-down.svg" alt="Down"></a>
-                <a href="#" class="right" onclick="sendRequest('/RIGHT'); return false;"><img src="caret-right.svg" alt="Right"></a>
+                <a href="#" class="left" onclick="sendRequest('/Gauche'); return false;"><img src="caret-left.svg" alt="Left"></a>
+                <a href="#" class="up" onclick="sendRequest('/Avance'); return false;"><img src="sort-up.svg" alt="Up"></a>
+                <a href="#" class="down" onclick="sendRequest('/Arrete'); return false;"><img src="sort-down.svg" alt="Down"></a>
+                <a href="#" class="right" onclick="sendRequest('/Droit'); return false;"><img src="caret-right.svg" alt="Right"></a>
             </div>
         </div>
     </div>
-
     <script>
-        
-        function updateIndicators() {
-        fetch('http://your-node-red-server:1880/esp32/data')
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById('temperature-value').textContent = data.temperature;
-                document.getElementById('speed-value').textContent = data.speed;
-            })
-            .catch(error => console.error('Error fetching data:', error));
-    }
+    let isKeyDown = {};
 
-    setInterval(updateIndicators, 5000); 
-        let isKeyDown = {};
-        let speedInterval;
-        let currentSpeed = 0;
-        let currentTemperature = 25;
-
-        function sendRequest(action) {
-            fetch(action)
-                .then(response => {
-                    if (!response.ok) throw new Error('Network response was not ok');
-                    return response.text();
-                })
-                .then(data => {
-                    if (action.includes('SPEED')) {
-                        currentSpeed = parseInt(data, 10);
-                        document.getElementById('speed-value').textContent = currentSpeed;
-                    }
-                })
-                .catch(error => console.error('Fetch error:', error));
-        }
-
-        document.addEventListener('keydown', function(event) {
-            if (!isKeyDown[event.key]) {
-                isKeyDown[event.key] = true;
-
-                if (event.key === 'ArrowUp') {
-                    document.querySelector('.up img').src = 'square-up.svg';
-                    sendRequest('/UP');
-                    speedInterval = setInterval(() => {
-                        if (currentSpeed < 100) {
-                            sendRequest('/SPEED_UP');
-                        } else {
-                            clearInterval(speedInterval);
-                        }
-                    }, 300);
-                } else if (event.key === 'ArrowDown') {
-                    document.querySelector('.down img').src = 'square-down.svg';
-                    sendRequest('/DOWN');
-                    speedInterval = setInterval(() => {
-                        if (currentSpeed > 0) {
-                            sendRequest('/SPEED_DOWN');
-                        } else {
-                            clearInterval(speedInterval);
-                        }
-                    }, 300);
-                } else if (event.key === 'ArrowLeft') {
-                    document.querySelector('.left img').src = 'square-left.svg'; 
-                    sendRequest('/LEFT');
-                } else if (event.key === 'ArrowRight') {
-                    document.querySelector('.right img').src = 'square-right.svg'; 
-                    sendRequest('/RIGHT');
-                }
+function sendRequest(action) {
+    fetch(action)
+        .then(response => {
+            if (!response.ok) throw new Error('Network response was not ok');
+            return response.text();
+        })
+        .then(data => {
+            if (action.includes('SPEED')) {
+                currentSpeed = parseInt(data, 10);
+                document.getElementById('speed-value').textContent = currentSpeed;
             }
-        });
+        })
+        .catch(error => console.error('Fetch error:', error));
+}
 
+function updateTemperature() {
+    fetch('http://localhost:1881/temperature')
+        .then(response => response.json())
+        .then(data => {
+            console.log('Temperature:', data.temperature);
+            document.getElementById('temp-value').innerText = data.temperature + '°C';
+        })
+        .catch(error => console.error('Error:', error));
+}
+
+function updateSpeed() {
+    fetch('http://localhost:1880/speed')
+        .then(response => response.json())
+        .then(data => {
+            console.log('Speed data:', data); 
+            if (data.speed !== undefined) {
+                document.getElementById('speed-value').textContent = data.speed + ' km/h';
+            } else {
+                console.error('Speed data is missing');
+            }
+        })
+        .catch(error => console.error('Error fetching speed:', error));
+}
+
+window.onload = function() {
+    setInterval(updateTemperature, 2000); 
+    setInterval(updateSpeed, 2000);
+};
+
+document.addEventListener('keydown', function(event) {
+    if (!isKeyDown[event.key]) {
+        isKeyDown[event.key] = true;
+
+        if (event.key === 'ArrowUp') {
+            document.querySelector('.up img').src = 'square-up.svg';
+            sendRequest('/UP');
+            speedInterval = setInterval(() => {
+                if (currentSpeed < 100) {
+                    sendRequest('/SPEED_UP');
+                } else {
+                    clearInterval(speedInterval);
+                }
+            }, 300);
+        } else if (event.key === 'ArrowDown') {
+            document.querySelector('.down img').src = 'square-down.svg';
+            sendRequest('/DOWN');
+            speedInterval = setInterval(() => {
+                if (currentSpeed > 0) {
+                    sendRequest('/SPEED_DOWN');
+                } else {
+                    clearInterval(speedInterval);
+                }
+            }, 300);
+        } else if (event.key === 'ArrowLeft') {
+            document.querySelector('.left img').src = 'square-left.svg'; 
+            sendRequest('/LEFT');
+        } else if (event.key === 'ArrowRight') {
+            document.querySelector('.right img').src = 'square-right.svg'; 
+            sendRequest('/RIGHT');
+        }
+    }
+});
+
+    
         document.addEventListener('keyup', function(event) {
             if (isKeyDown[event.key]) {
                 isKeyDown[event.key] = false;
@@ -412,19 +443,16 @@
                 }
             }
         });
+    
+        function updateImage() {
+        const camera = document.getElementById('camera');
+        camera.src = 'http://192.168.1.37:81/stream?rand=' + Math.random();
+    }
 
-        function startCamera() {
-            const videoElement = document.getElementById('camera');
-            navigator.mediaDevices.getUserMedia({ video: true })
-                .then((stream) => {
-                    videoElement.srcObject = stream;
-                })
-                .catch((error) => {
-                    console.error('Error accessing the webcam:', error);
-                });
-        }
-
-        window.onload = startCamera;
+    window.onload = function() {
+        setInterval(updateTemperature, 2000); 
+        setInterval(updateSpeed, 2000);
+    };
     </script>
 </body>
 </html>
