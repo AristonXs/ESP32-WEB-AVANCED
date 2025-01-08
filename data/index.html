@@ -330,8 +330,6 @@
                 
                 <path id="glitch-path" d="M10,10 L30,10 L40,25 L210,25" fill="none"/>
             </svg>
-            
-            
         </div>
         <div class="panel bottom-bar">
             <div class="arrow-grid">
@@ -343,116 +341,92 @@
         </div>
     </div>
     <script>
+    const baseUrl = 'http://192.168.1.21';
     let isKeyDown = {};
 
-function sendRequest(action) {
-    fetch(action)
-        .then(response => {
-            if (!response.ok) throw new Error('Network response was not ok');
-            return response.text();
-        })
-        .then(data => {
-            if (action.includes('SPEED')) {
-                currentSpeed = parseInt(data, 10);
-                document.getElementById('speed-value').textContent = currentSpeed;
-            }
-        })
-        .catch(error => console.error('Fetch error:', error));
-}
-
-function updateTemperature() {
-    fetch('http://localhost:1881/temperature')
-        .then(response => response.json())
-        .then(data => {
-            console.log('Temperature:', data.temperature);
-            document.getElementById('temp-value').innerText = data.temperature + '°C';
-        })
-        .catch(error => console.error('Error:', error));
-}
-
-function updateSpeed() {
-    fetch('http://localhost:1880/speed')
-        .then(response => response.json())
-        .then(data => {
-            console.log('Speed data:', data); 
-            if (data.speed !== undefined) {
-                document.getElementById('speed-value').textContent = data.speed + ' km/h';
-            } else {
-                console.error('Speed data is missing');
-            }
-        })
-        .catch(error => console.error('Error fetching speed:', error));
-}
-
-window.onload = function() {
-    setInterval(updateTemperature, 2000); 
-    setInterval(updateSpeed, 2000);
-};
-
-document.addEventListener('keydown', function(event) {
-    if (!isKeyDown[event.key]) {
-        isKeyDown[event.key] = true;
-
-        if (event.key === 'ArrowUp') {
-            document.querySelector('.up img').src = 'square-up.svg';
-            sendRequest('/UP');
-            speedInterval = setInterval(() => {
-                if (currentSpeed < 100) {
-                    sendRequest('/SPEED_UP');
-                } else {
-                    clearInterval(speedInterval);
-                }
-            }, 300);
-        } else if (event.key === 'ArrowDown') {
-            document.querySelector('.down img').src = 'square-down.svg';
-            sendRequest('/DOWN');
-            speedInterval = setInterval(() => {
-                if (currentSpeed > 0) {
-                    sendRequest('/SPEED_DOWN');
-                } else {
-                    clearInterval(speedInterval);
-                }
-            }, 300);
-        } else if (event.key === 'ArrowLeft') {
-            document.querySelector('.left img').src = 'square-left.svg'; 
-            sendRequest('/LEFT');
-        } else if (event.key === 'ArrowRight') {
-            document.querySelector('.right img').src = 'square-right.svg'; 
-            sendRequest('/RIGHT');
-        }
+    function sendRequest(action) {
+        fetch(`${baseUrl}${action}`)
+            .then(response => {
+                console.log(`Response for ${action}: ${response.status}`);
+            })
+            .catch(error => console.error('Fetch error:', error));
     }
-});
 
-    
-        document.addEventListener('keyup', function(event) {
-            if (isKeyDown[event.key]) {
-                isKeyDown[event.key] = false;
-                clearInterval(speedInterval);
-                if (event.key === 'ArrowUp') {
-                    document.querySelector('.up img').src = 'sort-up.svg';
-                    sendRequest('/UP_OFF');
-                } else if (event.key === 'ArrowDown') {
-                    document.querySelector('.down img').src = 'sort-down.svg';
-                    sendRequest('/DOWN_OFF');
-                } else if (event.key === 'ArrowLeft') {
-                    document.querySelector('.left img').src = 'caret-left.svg'; 
-                    sendRequest('/LEFT_OFF');
-                } else if (event.key === 'ArrowRight') {
-                    document.querySelector('.right img').src = 'caret-right.svg';
-                    sendRequest('/RIGHT_OFF');
+    function updateTemperature() {
+        fetch('http://localhost:1881/temperature')
+            .then(response => response.json())
+            .then(data => {
+                console.log('Temperature:', data.temperature);
+                document.getElementById('temp-value').innerText = data.temperature + '°C';
+            })
+            .catch(error => console.error('Error:', error));
+    }
+
+    function updateSpeed() {
+        fetch('http://localhost:1880/speed')
+            .then(response => response.json())
+            .then(data => {
+                console.log('Speed data:', data); 
+                if (data.speed !== undefined) {
+                    document.getElementById('speed-value').textContent = data.speed + ' km/h';
+                } else {
+                    console.error('Speed data is missing');
                 }
-            }
-        });
-    
-        function updateImage() {
-        const camera = document.getElementById('camera');
-        camera.src = 'http://192.168.1.37:81/stream?rand=' + Math.random();
+            })
+            .catch(error => console.error('Error fetching speed:', error));
     }
 
     window.onload = function() {
         setInterval(updateTemperature, 2000); 
         setInterval(updateSpeed, 2000);
     };
+
+    document.addEventListener('keydown', function(event) {
+        if (!isKeyDown[event.key]) {
+            isKeyDown[event.key] = true;
+
+            if (event.key === 'ArrowUp') {
+                document.querySelector('.up img').src = 'square-up.svg';
+                robotMoveForward();
+                sendRequest('/Avancer');
+            } else if (event.key === 'ArrowDown') {
+                document.querySelector('.down img').src = 'square-down.svg';
+                robotStop();
+                sendRequest('/Arreter');
+            } else if (event.key === 'ArrowLeft') {
+                document.querySelector('.left img').src = 'square-left.svg'; 
+                robotTurnLeft();
+                sendRequest('/Gauche');
+            } else if (event.key === 'ArrowRight') {
+                document.querySelector('.right img').src = 'square-right.svg'; 
+                robotTurnRight();
+                sendRequest('/Droite');
+            }
+        }
+    });
+
+    document.addEventListener('keyup', function(event) {
+        if (isKeyDown[event.key]) {
+            isKeyDown[event.key] = false;
+            if (event.key === 'ArrowUp') {
+                document.querySelector('.up img').src = 'sort-up.svg';
+                sendRequest('/Avancer');
+            } else if (event.key === 'ArrowDown') {
+                document.querySelector('.down img').src = 'sort-down.svg';
+                sendRequest('/Arreter');
+            } else if (event.key === 'ArrowLeft') {
+                document.querySelector('.left img').src = 'caret-left.svg'; 
+                sendRequest('/Gauche');
+            } else if (event.key === 'ArrowRight') {
+                document.querySelector('.right img').src = 'caret-right.svg';
+                sendRequest('/Droite');
+            }
+        }
+    });
+    function updateImage() {
+        const camera = document.getElementById('camera');
+        camera.src = 'http://192.168.1.37:81/stream?rand=' + Math.random();
+    }
     </script>
 </body>
 </html>
