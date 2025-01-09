@@ -99,15 +99,20 @@
         width: 100%;
         height: 100%;
     }
-        .camera-output {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            border: 2px solid #00ffff;
-        }
-    
+    .camera-output {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-left: 2px solid #00ffff;
+        border-right: 2px solid #00ffff;
+        border-bottom: 2px solid #00ffff;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 0 50px rgba(0, 255, 255, 0.7); 
+    }
+
         .camera-output video {
             width: 100%;
             height: 100%;
@@ -140,6 +145,11 @@
     background: radial-gradient(circle, rgba(0, 255, 255, 0.2), transparent);
     animation: rotate 5s linear infinite;
 }
+.active {
+        background: rgba(0, 255, 255, 0.3);
+        box-shadow: 0 0 20px rgba(0, 255, 255, 1);
+        transform: scale(1.05);
+    }
 
 @keyframes rotate {
     from {
@@ -211,7 +221,40 @@
             opacity: 1;
         }
     }
+    .speed-control {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        right: 10px; 
+        bottom: 30px;
+        gap: 5px;
+        transform: translateX(-600px); 
+    }
 
+    .speed-control a {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border: 2px solid #00ffff;
+        border-radius: 10px;
+        width: 50px; 
+        height: 50px; 
+        background: rgba(0, 0, 0, 0.5);
+        box-shadow: 0 0 10px rgba(0, 255, 255, 0.8);
+        transition: all 0.3s ease;
+    }
+
+    .speed-control a:hover {
+        background: rgba(0, 255, 255, 0.1);
+        box-shadow: 0 0 15px rgba(0, 255, 255, 1);
+        transform: scale(1.1);
+    }
+
+    .speed-control img {
+        width: 25px; 
+        height: 25px;
+        filter: drop-shadow(0px 0px 5px #00ffff);
+    }
 .neon-dot {
      stroke: cyan;
     stroke-width: 7;
@@ -338,50 +381,64 @@
                 <a href="#" class="down" onclick="sendRequest('/Arrete'); return false;"><img src="sort-down.svg" alt="Down"></a>
                 <a href="#" class="right" onclick="sendRequest('/Droit'); return false;"><img src="caret-right.svg" alt="Right"></a>
             </div>
+            <div class="speed-control">
+                <a href="#" class="increase-speed" onclick="sendRequest('/Plusvite'); return false;">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="25" height="25" fill="#00ffff">
+                        <path d="M12 2L15 8H9L12 2Z" /> 
+                        <path d="M12 22V8" stroke="#00ffff" stroke-width="2"/> 
+                    </svg>
+                </a>
+                <a href="#" class="decrease-speed" onclick="sendRequest('/Moinsvite'); return false;">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="25" height="25" fill="#00ffff">
+                        <path d="M12 22L9 16H15L12 22Z" /> 
+                        <path d="M12 2V16" stroke="#00ffff" stroke-width="2"/> 
+                    </svg>
+                </a>
+            </div>
         </div>
     </div>
     <script>
-    const baseUrl = 'http://192.168.1.21';
-    let isKeyDown = {};
-
-    function sendRequest(action) {
-        fetch(`${baseUrl}${action}`)
-            .then(response => {
-                console.log(`Response for ${action}: ${response.status}`);
-            })
-            .catch(error => console.error('Fetch error:', error));
-    }
-
-    function updateTemperature() {
-        fetch('http://localhost:1881/temperature')
-            .then(response => response.json())
-            .then(data => {
-                console.log('Temperature:', data.temperature);
-                document.getElementById('temp-value').innerText = data.temperature + '°C';
-            })
-            .catch(error => console.error('Error:', error));
-    }
-
-    function updateSpeed() {
-        fetch('http://localhost:1880/speed')
-            .then(response => response.json())
-            .then(data => {
-                console.log('Speed data:', data); 
-                if (data.speed !== undefined) {
-                    document.getElementById('speed-value').textContent = data.speed + ' km/h';
-                } else {
-                    console.error('Speed data is missing');
-                }
-            })
-            .catch(error => console.error('Error fetching speed:', error));
-    }
-
-    window.onload = function() {
-        setInterval(updateTemperature, 2000); 
-        setInterval(updateSpeed, 2000);
-    };
-
-    document.addEventListener('keydown', function(event) {
+        const baseUrl = 'http://192.168.1.21';
+        let isKeyDown = {};
+        
+        function sendRequest(action) {
+            fetch(`${baseUrl}${action}`)
+                .then(response => {
+                    console.log(`Response for ${action}: ${response.status}`);
+                })
+                .catch(error => console.error('Fetch error:', error));
+        }
+        
+        function updateTemperature() {
+            fetch('http://localhost:1881/temperature')
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Temperature:', data.temperature);
+                    document.getElementById('temp-value').innerText = data.temperature + '°C';
+                })
+                .catch(error => console.error('Error:', error));
+        }
+        
+        function updateSpeed() {
+            fetch('http://localhost:1880/speed')
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Speed data:', data); 
+                    if (data.speed !== undefined) {
+                        document.getElementById('speed-value').textContent = data.speed + ' km/h';
+                    } else {
+                        console.error('Speed data is missing');
+                    }
+                })
+                .catch(error => console.error('Error fetching speed:', error));
+        }
+        
+        window.onload = function() {
+            setInterval(updateTemperature, 2000); 
+            setInterval(updateSpeed, 2000);
+        };
+        
+        document.addEventListener('keydown', function(event) {
         if (!isKeyDown[event.key]) {
             isKeyDown[event.key] = true;
 
@@ -401,6 +458,12 @@
                 document.querySelector('.right img').src = 'square-right.svg'; 
                 robotTurnRight();
                 sendRequest('/Droite');
+            } else if (event.key === 'Shift') {
+                document.querySelector('.increase-speed').classList.add('active');
+                sendRequest('/Plusvite');
+            } else if (event.key === 'Control') {
+                document.querySelector('.decrease-speed').classList.add('active');
+                sendRequest('/Moinsvite');
             }
         }
     });
@@ -420,13 +483,18 @@
             } else if (event.key === 'ArrowRight') {
                 document.querySelector('.right img').src = 'caret-right.svg';
                 sendRequest('/Droite');
+            } else if (event.key === 'Shift') {
+                document.querySelector('.increase-speed').classList.remove('active');
+            } else if (event.key === 'Control') {
+                document.querySelector('.decrease-speed').classList.remove('active');
             }
         }
     });
-    function updateImage() {
-        const camera = document.getElementById('camera');
-        camera.src = 'http://192.168.1.37:81/stream?rand=' + Math.random();
-    }
-    </script>
+        
+        function updateImage() {
+            const camera = document.getElementById('camera');
+            camera.src = 'http://192.168.1.37:81/stream?rand=' + Math.random();
+        }
+        </script>
 </body>
 </html>
