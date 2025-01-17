@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SKYBot Control Panel</title>
     <link rel="stylesheet" type="text/css" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body {
             margin: 0;
@@ -311,6 +312,26 @@
     width: 15%;
     height: 7%;
 }
+.temperature-container {
+            position: absolute;
+            top: 14%;
+            left: 0px; 
+            width: 230px;
+            z-index: 1;
+        }
+
+        .speed-container {
+            position: absolute;
+            top: 14%;
+            right: 0px;
+            width: 240px; 
+            z-index: 1;
+        }
+
+        .chart {
+            width: 100%; 
+            height: 200px; 
+        }
     </style>
 </head>
 <body>
@@ -319,7 +340,7 @@
             <h1 class="glitch">Skybot Control Panel</h1>
         </div>
         <div class="panel new-panel">
-            <iframe src="http://localhost:1881/ui/#/1" width="257" height="350"></iframe>
+            <iframe src="http://localhost:1882/ui/#/1" width="245" height="350"></iframe>
         </div>
         
         <div class="panel left-panel" >
@@ -335,9 +356,16 @@
         </div>
         <div class="main-screen">
             <div class="camera-output">
-                <img id="camera" src="http://192.168.1.37:81/stream" alt="Camera Stream">
+                <img id="camera" src="http://192.168.1.38:81/stream" alt="Camera Stream">
             </div>
         </div>
+        <div class="temperature-container">
+            <canvas id="temperatureChart" class="chart"></canvas>
+        </div>
+        <div class="speed-container">
+            <canvas id="speedChart" class="chart"></canvas>
+        </div>
+
         <div class="panel new-panel" style="left: auto; right: 0px; z-index: -1;">
             <iframe src="http://localhost:1880/ui/#/1" width="257" height="350"></iframe>
         </div>
@@ -398,9 +426,62 @@
         </div>
     </div>
     <script>
-        const baseUrl = 'http://192.168.1.21';
+ const baseUrl = 'http://192.168.1.21';
+
         let isKeyDown = {};
-        
+
+        const temperatureData = {
+    labels: [],
+    datasets: [{
+        label: 'Temperature (°C)',
+        data: [],
+        borderColor: 'cyan',
+        backgroundColor: 'rgba(0, 255, 255, 0.2)',
+        fill: true
+    }]
+};
+
+        const speedData = {
+        labels: [],
+        datasets: [{
+            label: 'Speed (km/h)',
+            data: [],
+            borderColor: 'cyan',
+            backgroundColor: 'rgba(0, 255, 255, 0.2)',
+            fill: true
+        }]
+    };
+    const tempCtx = document.getElementById('temperatureChart').getContext('2d');
+const temperatureChart = new Chart(tempCtx, {
+    type: 'line',
+    data: temperatureData,
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+            y: {
+                beginAtZero: true,
+                max: 45 
+            }
+        }
+    }
+});
+
+    const speedCtx = document.getElementById('speedChart').getContext('2d');
+    const speedChart = new Chart(speedCtx, {
+        type: 'line',
+        data: speedData,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 30 
+                }
+            }
+        }
+    });
         function sendRequest(action) {
             fetch(`${baseUrl}${action}`)
                 .then(response => {
@@ -410,28 +491,45 @@
         }
         
         function updateTemperature() {
-            fetch('http://localhost:1881/temperature')
-                .then(response => response.json())
-                .then(data => {
-                    console.log('Temperature:', data.temperature);
-                    document.getElementById('temp-value').innerText = data.temperature + '°C';
-                })
-                .catch(error => console.error('Error:', error));
-        }
-        
+    fetch('http://localhost:1881/temperature')
+        .then(response => response.json())
+        .then(data => {
+            const currentTemperature = data.temperature;
+            document.getElementById('temp-value').innerText = currentTemperature + '°C';
+
+            temperatureData.labels.push(new Date().toLocaleTimeString());
+            temperatureData.datasets[0].data.push(currentTemperature);
+
+            if (temperatureData.labels.length > 20) {
+                temperatureData.labels.shift();
+                temperatureData.datasets[0].data.shift();
+            }
+
+            temperatureChart.update();
+        })
+        .catch(error => console.error('Error:', error));
+}
         function updateSpeed() {
-            fetch('http://localhost:1880/speed')
-                .then(response => response.json())
-                .then(data => {
-                    console.log('Speed data:', data); 
-                    if (data.speed !== undefined) {
-                        document.getElementById('speed-value').textContent = data.speed + ' km/h';
-                    } else {
-                        console.error('Speed data is missing');
-                    }
-                })
-                .catch(error => console.error('Error fetching speed:', error));
-        }
+        fetch('http://localhost:1880/speed')
+            .then(response => response.json())
+            .then(data => {
+                const currentSpeed = data.speed; 
+                document.getElementById('speed-value').innerText = currentSpeed + ' km/h';
+
+                speedData.labels.push(new Date().toLocaleTimeString());
+                speedData.datasets[0].data.push(currentSpeed);
+
+ 
+                if (speedData.labels.length > 20) {
+                    speedData.labels.shift();
+                    speedData.datasets[0].data.shift();
+                }
+
+                speedChart.update();
+            })
+            .catch(error => console.error('Error:', error));
+    }
+
         
         window.onload = function() {
             setInterval(updateTemperature, 2000); 
@@ -493,7 +591,7 @@
         
         function updateImage() {
             const camera = document.getElementById('camera');
-            camera.src = 'http://192.168.1.37:81/stream?rand=' + Math.random();
+            camera.src = 'http://192.168.1.38:81/stream?rand=' + Math.random();
         }
         </script>
 </body>
